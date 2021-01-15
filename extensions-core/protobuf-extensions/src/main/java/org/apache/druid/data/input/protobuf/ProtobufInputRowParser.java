@@ -152,7 +152,12 @@ public class ProtobufInputRowParser implements ByteBufferInputRowParser
         throw new ParseException(e, "Descriptor not found in class path or malformed URL:" + descriptorFilePath);
       }
       try {
-        fin = url.openConnection().getInputStream();
+        URLConnection urlConnection = url.openConnection();
+        if (url.getUserInfo() != null) {
+            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(url.getUserInfo().getBytes());
+            urlConnection.setRequestProperty("Authorization", basicAuth);
+        }
+        fin = urlConnection.getInputStream();
       }
       catch (IOException e) {
         throw new ParseException(e, "Cannot read descriptor file: " + url);
